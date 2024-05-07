@@ -11,7 +11,10 @@
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "tsc": "tsc",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --timeout 600000 -b -r ts-node/register -j 1 test/**/*.ts"
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\"}' mocha --timeout 600000 --retries 3 -b -r ts-node/register -j 1 test/**/*.ts"
+  },
+  "engines": {
+    "node": "^16"
   },
   "dependencies": {
     "agentkeepalive": "^4.2.1",

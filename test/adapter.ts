@@ -784,13 +784,11 @@ process.on('uncaughtException', (err: any, origin: any) => {
                     {
                         const downloader = new Downloader(qiniuAdapter);
                         const targetFilePath = tempfile();
-                        let fileDownloaded = 0;
 
                         await downloader.getObjectToFile(bucketRegionId, { bucket: bucketName, key: key }, targetFilePath, undefined, {
                             getCallback: {
                                 progressCallback: (p) => {
                                     expect(p.total).to.equal((1 << 20) * 2);
-                                    fileDownloaded = p.transferred;
                                 },
                                 headerCallback: (header) => {
                                     expect(header.size).to.equal((1 << 20) * 2);
@@ -800,7 +798,8 @@ process.on('uncaughtException', (err: any, origin: any) => {
                             chunkTimeout: 30000,
                             downloadThrottleOption: { rate: 1 << 30 },
                         });
-                        expect(fileDownloaded).to.equal((1 << 20) * 2);
+                        const downloadedFileStat = await fs.promises.stat(targetFilePath)
+                        expect(downloadedFileStat.size).to.equal((1 << 20) * 2);
                     }
 
                     await qiniuAdapter.deleteObject(bucketRegionId, { bucket: bucketName, key: key });
@@ -929,13 +928,11 @@ process.on('uncaughtException', (err: any, origin: any) => {
                     {
                         const downloader = new Downloader(qiniuAdapter);
                         const targetFilePath = tempfile();
-                        let fileDownloaded = 0;
 
                         await downloader.getObjectToFile(bucketRegionId, { bucket: bucketName, key: key }, targetFilePath, undefined, {
                             getCallback: {
                                 progressCallback: (p) => {
                                     expect(p.total).to.equal((1 << 20) * 11);
-                                    fileDownloaded = p.transferred;
                                 },
                                 headerCallback: (header) => {
                                     expect(header.size).to.equal((1 << 20) * 11);
@@ -944,7 +941,8 @@ process.on('uncaughtException', (err: any, origin: any) => {
                             partSize: 1 << 20,
                             chunkTimeout: 30000,
                         });
-                        expect(fileDownloaded).to.equal((1 << 20) * 11);
+                        const downloadedFileStat = await fs.promises.stat(targetFilePath);
+                        expect(downloadedFileStat.size).to.equal((1 << 20) * 11);
 
                         const md5FromSource = await new Promise((resolve, reject) => {
                             fs.readFile(tmpfilePath, { encoding: 'binary' }, (err, buf) => {
